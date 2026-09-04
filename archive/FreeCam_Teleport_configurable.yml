@@ -1,0 +1,641 @@
+Version: 1.2
+
+# =============================================================================
+# ARCHIVED snapshot — configurable teleport combo (testing 1.9).
+# Working patch: BLES00932_FreeCam_Teleport.yml (1.0, L3+R3 hardcoded).
+# =============================================================================
+# Demon's Souls — FreeCam (horkrux) + teleport player to debug camera
+# Patch Version: 1.9
+#
+# Regions (standard RPCS3 patch.yml FreeCam caves):
+#   BLES00932 01.00  cave 0x00220320  hook 0x001451F4   TESTED
+#   BLUS30443 01.00  cave 0x0021F498  hook 0x0014422C   slid -0xE88 from EU
+#   BCAS20071 01.04  cave 0x0021D570  hook 0x00142304   slid -0x2DB0 from EU
+#   BLUD80018 01.01  same addresses as BLUS30443 (demo loads US FreeCam)
+#   BCJS30022 01.04  no FreeCam cave in patch.yml — not included
+#
+# GetPadDevice bl encoding is identical in all three caves (code slide).
+# SetTransform / RefreshChr use the same PC-relative bl as EU, so they are
+# assumed to slide with the cave. ChrInsMan is TOC-relative (-0x788C(r2)).
+# US/AS/Demo teleport is not playtested.
+#
+# Combo is Configurable Values → "Teleport combo" (patch manager dropdown).
+# Check: lhz inner+0x12E; not r3; andi. MASK; bne if any required bit missing.
+# Default MASK 0x0300 = L3+R3. FreeCam (Cross+L3 tap) is unchanged.
+#
+# Last safe byte: cave+0x27C. Do not patch cave+0x280 (live constructor).
+# =============================================================================
+
+Anchors:
+  Teleport_Configurable: &Teleport_Configurable
+    "Teleport combo":
+      Type: long_enum
+      Value: 0x70630300
+      Allowed Values:
+        "L3 + R3": 0x70630300
+        "L3 + Triangle": 0x70630101
+        "L3 + Circle": 0x70630102
+        "R3": 0x70630200
+        "L1 + R1": 0x70630030
+        "Triangle + Circle": 0x70630003
+
+  BLES00932_FreeCam: &BLES00932_FreeCam
+    - [ be32, 0x001451f4, 0x480db12d ]
+    - [ be32, 0x00220320, 0xf821ff61 ]
+    - [ be32, 0x00220324, 0x7c0802a6 ]
+    - [ be32, 0x00220328, 0xf80100b0 ]
+    - [ be32, 0x0022032c, 0x38600000 ]
+    - [ be32, 0x00220330, 0x4bfa5639 ]
+    - [ be32, 0x00220334, 0x60000000 ]
+    - [ be32, 0x00220338, 0x813e203c ]
+    - [ be32, 0x0022033c, 0x38000000 ]
+    - [ be32, 0x00220340, 0x91210090 ]
+    - [ be32, 0x00220344, 0x90610094 ]
+    - [ be32, 0x00220348, 0x90010098 ]
+    - [ be32, 0x0022034c, 0x81630004 ]
+    - [ be32, 0x00220350, 0xa06b0120 ]
+    - [ be32, 0x00220354, 0x7863bfe2 ]
+    - [ be32, 0x00220358, 0x60000000 ]
+    - [ be32, 0x0022035c, 0x5463063e ]
+    - [ be32, 0x00220360, 0x2f830000 ]
+    - [ be32, 0x00220364, 0x419e0034 ]
+    - [ be32, 0x00220368, 0xa00b011e ]
+    - [ be32, 0x0022036c, 0x2f80000a ]
+    - [ be32, 0x00220370, 0x409e0028 ]
+    - [ be32, 0x00220374, 0x813f0034 ]
+    - [ be32, 0x00220378, 0x800901fc ]
+    - [ be32, 0x0022037c, 0x38600001 ]
+    - [ be32, 0x00220380, 0x7c001a14 ]
+    - [ be32, 0x00220384, 0x900901fc ]
+    - [ be32, 0x00220388, 0x2f800004 ]
+    - [ be32, 0x0022038c, 0x409e000c ]
+    - [ be32, 0x00220390, 0x38000000 ]
+    - [ be32, 0x00220394, 0x900901fc ]
+    - [ be32, 0x00220398, 0x813f0034 ]
+    - [ be32, 0x0022039c, 0x800901fc ]
+    - [ be32, 0x002203a0, 0x2f800001 ]
+    - [ be32, 0x002203a4, 0x419e005c ]
+    - [ be32, 0x002203a8, 0x2f800002 ]
+    - [ be32, 0x002203ac, 0x419e007c ]
+    - [ be32, 0x002203b0, 0x2f800003 ]
+    - [ be32, 0x002203b4, 0x419e0080 ]
+    - [ be32, 0x002203b8, 0x80690204 ]
+    - [ be32, 0x002203bc, 0x80890008 ]
+    - [ be32, 0x002203c0, 0x38630010 ]
+    - [ be32, 0x002203c4, 0x38840010 ]
+    - [ be32, 0x002203c8, 0x38a00010 ]
+    - [ be32, 0x002203cc, 0x38c00020 ]
+    - [ be32, 0x002203d0, 0x38e00030 ]
+    - [ be32, 0x002203d4, 0x7c2020ce ]
+    - [ be32, 0x002203d8, 0x7c2019ce ]
+    - [ be32, 0x002203dc, 0x7c2428ce ]
+    - [ be32, 0x002203e0, 0x7c2329ce ]
+    - [ be32, 0x002203e4, 0x7c2430ce ]
+    - [ be32, 0x002203e8, 0x7c2331ce ]
+    - [ be32, 0x002203ec, 0x7c2438ce ]
+    - [ be32, 0x002203f0, 0x7c2339ce ]
+    - [ be32, 0x002203f4, 0x9b7f0058 ]
+    - [ be32, 0x002203f8, 0x9b7f0059 ]
+    - [ be32, 0x002203fc, 0x480000a0 ]
+    - [ be32, 0x00220400, 0xa06b0122 ]
+    - [ be32, 0x00220404, 0x7863e7e2 ]
+    - [ be32, 0x00220408, 0x5463063e ]
+    - [ be32, 0x0022040c, 0x2f830000 ]
+    - [ be32, 0x00220410, 0x419e0008 ]
+    - [ be32, 0x00220414, 0x48000014 ]
+    - [ be32, 0x00220418, 0x38000001 ]
+    - [ be32, 0x0022041c, 0x981f0058 ]
+    - [ be32, 0x00220420, 0x981f0059 ]
+    - [ be32, 0x00220424, 0x48000058 ]
+    - [ be32, 0x00220428, 0x9b7f0058 ]
+    - [ be32, 0x0022042c, 0x9b7f0059 ]
+    - [ be32, 0x00220430, 0x4800004c ]
+    - [ be32, 0x00220434, 0x8069000c ]
+    - [ be32, 0x00220438, 0x80890204 ]
+    - [ be32, 0x0022043c, 0x38630010 ]
+    - [ be32, 0x00220440, 0x38840010 ]
+    - [ be32, 0x00220444, 0x38a00010 ]
+    - [ be32, 0x00220448, 0x38c00020 ]
+    - [ be32, 0x0022044c, 0x38e00030 ]
+    - [ be32, 0x00220450, 0x7c2020ce ]
+    - [ be32, 0x00220454, 0x7c2019ce ]
+    - [ be32, 0x00220458, 0x7c2428ce ]
+    - [ be32, 0x0022045c, 0x7c2329ce ]
+    - [ be32, 0x00220460, 0x7c2430ce ]
+    - [ be32, 0x00220464, 0x7c2331ce ]
+    - [ be32, 0x00220468, 0x7c2438ce ]
+    - [ be32, 0x0022046c, 0x7c2339ce ]
+    - [ be32, 0x00220470, 0x9b7f0058 ]
+    - [ be32, 0x00220474, 0x9b7f0059 ]
+    - [ be32, 0x00220478, 0x48000024 ]
+    - [ be32, 0x0022047c, 0x38000001 ]
+    - [ be32, 0x00220480, 0x901f0044 ]
+    - [ be32, 0x00220484, 0x38c00000 ]
+    - [ be32, 0x00220488, 0x38a00000 ]
+    - [ be32, 0x0022048c, 0x80810094 ]
+    - [ be32, 0x00220490, 0x80690204 ]
+    - [ be32, 0x00220494, 0x4bf0be2d ]
+    - [ be32, 0x00220498, 0x60000000 ]
+    - [ be32, 0x0022049c, 0x80610094 ]
+    - [ be32, 0x002204a0, 0xe80100b0 ]
+    - [ be32, 0x002204a4, 0x7c0803a6 ]
+    - [ be32, 0x002204a8, 0x382100a0 ]
+    - [ be32, 0x002204ac, 0x4e800020 ]
+
+  BLUS30443_FreeCam: &BLUS30443_FreeCam
+    - [ be32, 0x0014422c, 0x480db26d ]
+    - [ be32, 0x0021f498, 0xf821ff61 ]
+    - [ be32, 0x0021f49c, 0x7c0802a6 ]
+    - [ be32, 0x0021f4a0, 0xf80100b0 ]
+    - [ be32, 0x0021f4a4, 0x38600000 ]
+    - [ be32, 0x0021f4a8, 0x4bfa5639 ]
+    - [ be32, 0x0021f4ac, 0x60000000 ]
+    - [ be32, 0x0021f4b0, 0x813e203c ]
+    - [ be32, 0x0021f4b4, 0x38000000 ]
+    - [ be32, 0x0021f4b8, 0x91210090 ]
+    - [ be32, 0x0021f4bc, 0x90610094 ]
+    - [ be32, 0x0021f4c0, 0x90010098 ]
+    - [ be32, 0x0021f4c4, 0x81630004 ]
+    - [ be32, 0x0021f4c8, 0xa06b0120 ]
+    - [ be32, 0x0021f4cc, 0x7863bfe2 ]
+    - [ be32, 0x0021f4d0, 0x60000000 ]
+    - [ be32, 0x0021f4d4, 0x5463063e ]
+    - [ be32, 0x0021f4d8, 0x2f830000 ]
+    - [ be32, 0x0021f4dc, 0x419e0034 ]
+    - [ be32, 0x0021f4e0, 0xa00b011e ]
+    - [ be32, 0x0021f4e4, 0x2f80000a ]
+    - [ be32, 0x0021f4e8, 0x409e0028 ]
+    - [ be32, 0x0021f4ec, 0x813f0034 ]
+    - [ be32, 0x0021f4f0, 0x800901fc ]
+    - [ be32, 0x0021f4f4, 0x38600001 ]
+    - [ be32, 0x0021f4f8, 0x7c001a14 ]
+    - [ be32, 0x0021f4fc, 0x900901fc ]
+    - [ be32, 0x0021f500, 0x2f800004 ]
+    - [ be32, 0x0021f504, 0x409e000c ]
+    - [ be32, 0x0021f508, 0x38000000 ]
+    - [ be32, 0x0021f50c, 0x900901fc ]
+    - [ be32, 0x0021f510, 0x813f0034 ]
+    - [ be32, 0x0021f514, 0x800901fc ]
+    - [ be32, 0x0021f518, 0x2f800001 ]
+    - [ be32, 0x0021f51c, 0x419e005c ]
+    - [ be32, 0x0021f520, 0x2f800002 ]
+    - [ be32, 0x0021f524, 0x419e007c ]
+    - [ be32, 0x0021f528, 0x2f800003 ]
+    - [ be32, 0x0021f52c, 0x419e0080 ]
+    - [ be32, 0x0021f530, 0x80690204 ]
+    - [ be32, 0x0021f534, 0x80890008 ]
+    - [ be32, 0x0021f538, 0x38630010 ]
+    - [ be32, 0x0021f53c, 0x38840010 ]
+    - [ be32, 0x0021f540, 0x38a00010 ]
+    - [ be32, 0x0021f544, 0x38c00020 ]
+    - [ be32, 0x0021f548, 0x38e00030 ]
+    - [ be32, 0x0021f54c, 0x7c2020ce ]
+    - [ be32, 0x0021f550, 0x7c2019ce ]
+    - [ be32, 0x0021f554, 0x7c2428ce ]
+    - [ be32, 0x0021f558, 0x7c2329ce ]
+    - [ be32, 0x0021f55c, 0x7c2430ce ]
+    - [ be32, 0x0021f560, 0x7c2331ce ]
+    - [ be32, 0x0021f564, 0x7c2438ce ]
+    - [ be32, 0x0021f568, 0x7c2339ce ]
+    - [ be32, 0x0021f56c, 0x9b7f0058 ]
+    - [ be32, 0x0021f570, 0x9b7f0059 ]
+    - [ be32, 0x0021f574, 0x480000a0 ]
+    - [ be32, 0x0021f578, 0xa06b0122 ]
+    - [ be32, 0x0021f57c, 0x7863e7e2 ]
+    - [ be32, 0x0021f580, 0x5463063e ]
+    - [ be32, 0x0021f584, 0x2f830000 ]
+    - [ be32, 0x0021f588, 0x419e0008 ]
+    - [ be32, 0x0021f58c, 0x48000014 ]
+    - [ be32, 0x0021f590, 0x38000001 ]
+    - [ be32, 0x0021f594, 0x981f0058 ]
+    - [ be32, 0x0021f598, 0x981f0059 ]
+    - [ be32, 0x0021f59c, 0x48000058 ]
+    - [ be32, 0x0021f5a0, 0x9b7f0058 ]
+    - [ be32, 0x0021f5a4, 0x9b7f0059 ]
+    - [ be32, 0x0021f5a8, 0x4800004c ]
+    - [ be32, 0x0021f5ac, 0x8069000c ]
+    - [ be32, 0x0021f5b0, 0x80890204 ]
+    - [ be32, 0x0021f5b4, 0x38630010 ]
+    - [ be32, 0x0021f5b8, 0x38840010 ]
+    - [ be32, 0x0021f5bc, 0x38a00010 ]
+    - [ be32, 0x0021f5c0, 0x38c00020 ]
+    - [ be32, 0x0021f5c4, 0x38e00030 ]
+    - [ be32, 0x0021f5c8, 0x7c2020ce ]
+    - [ be32, 0x0021f5cc, 0x7c2019ce ]
+    - [ be32, 0x0021f5d0, 0x7c2428ce ]
+    - [ be32, 0x0021f5d4, 0x7c2329ce ]
+    - [ be32, 0x0021f5d8, 0x7c2430ce ]
+    - [ be32, 0x0021f5dc, 0x7c2331ce ]
+    - [ be32, 0x0021f5e0, 0x7c2438ce ]
+    - [ be32, 0x0021f5e4, 0x7c2339ce ]
+    - [ be32, 0x0021f5e8, 0x9b7f0058 ]
+    - [ be32, 0x0021f5ec, 0x9b7f0059 ]
+    - [ be32, 0x0021f5f0, 0x48000024 ]
+    - [ be32, 0x0021f5f4, 0x38000001 ]
+    - [ be32, 0x0021f5f8, 0x901f0044 ]
+    - [ be32, 0x0021f5fc, 0x38c00000 ]
+    - [ be32, 0x0021f600, 0x38a00000 ]
+    - [ be32, 0x0021f604, 0x80810094 ]
+    - [ be32, 0x0021f608, 0x80690204 ]
+    - [ be32, 0x0021f60c, 0x4bf0bced ]
+    - [ be32, 0x0021f610, 0x60000000 ]
+    - [ be32, 0x0021f614, 0x80610094 ]
+    - [ be32, 0x0021f618, 0xe80100b0 ]
+    - [ be32, 0x0021f61c, 0x7c0803a6 ]
+    - [ be32, 0x0021f620, 0x382100a0 ]
+    - [ be32, 0x0021f624, 0x4e800020 ]
+
+  BCAS20071_FreeCam: &BCAS20071_FreeCam
+    - [ be32, 0x00142304, 0x480db26d ]
+    - [ be32, 0x0021d570, 0xf821ff61 ]
+    - [ be32, 0x0021d574, 0x7c0802a6 ]
+    - [ be32, 0x0021d578, 0xf80100b0 ]
+    - [ be32, 0x0021d57c, 0x38600000 ]
+    - [ be32, 0x0021d580, 0x4bfa5639 ]
+    - [ be32, 0x0021d584, 0x60000000 ]
+    - [ be32, 0x0021d588, 0x813e203c ]
+    - [ be32, 0x0021d58c, 0x38000000 ]
+    - [ be32, 0x0021d590, 0x91210090 ]
+    - [ be32, 0x0021d594, 0x90610094 ]
+    - [ be32, 0x0021d598, 0x90010098 ]
+    - [ be32, 0x0021d59c, 0x81630004 ]
+    - [ be32, 0x0021d5a0, 0xa06b0120 ]
+    - [ be32, 0x0021d5a4, 0x7863bfe2 ]
+    - [ be32, 0x0021d5a8, 0x60000000 ]
+    - [ be32, 0x0021d5ac, 0x5463063e ]
+    - [ be32, 0x0021d5b0, 0x2f830000 ]
+    - [ be32, 0x0021d5b4, 0x419e0034 ]
+    - [ be32, 0x0021d5b8, 0xa00b011e ]
+    - [ be32, 0x0021d5bc, 0x2f80000a ]
+    - [ be32, 0x0021d5c0, 0x409e0028 ]
+    - [ be32, 0x0021d5c4, 0x813f0034 ]
+    - [ be32, 0x0021d5c8, 0x800901fc ]
+    - [ be32, 0x0021d5cc, 0x38600001 ]
+    - [ be32, 0x0021d5d0, 0x7c001a14 ]
+    - [ be32, 0x0021d5d4, 0x900901fc ]
+    - [ be32, 0x0021d5d8, 0x2f800004 ]
+    - [ be32, 0x0021d5dc, 0x409e000c ]
+    - [ be32, 0x0021d5e0, 0x38000000 ]
+    - [ be32, 0x0021d5e4, 0x900901fc ]
+    - [ be32, 0x0021d5e8, 0x813f0034 ]
+    - [ be32, 0x0021d5ec, 0x800901fc ]
+    - [ be32, 0x0021d5f0, 0x2f800001 ]
+    - [ be32, 0x0021d5f4, 0x419e005c ]
+    - [ be32, 0x0021d5f8, 0x2f800002 ]
+    - [ be32, 0x0021d5fc, 0x419e007c ]
+    - [ be32, 0x0021d600, 0x2f800003 ]
+    - [ be32, 0x0021d604, 0x419e0080 ]
+    - [ be32, 0x0021d608, 0x80690204 ]
+    - [ be32, 0x0021d60c, 0x80890008 ]
+    - [ be32, 0x0021d610, 0x38630010 ]
+    - [ be32, 0x0021d614, 0x38840010 ]
+    - [ be32, 0x0021d618, 0x38a00010 ]
+    - [ be32, 0x0021d61c, 0x38c00020 ]
+    - [ be32, 0x0021d620, 0x38e00030 ]
+    - [ be32, 0x0021d624, 0x7c2020ce ]
+    - [ be32, 0x0021d628, 0x7c2019ce ]
+    - [ be32, 0x0021d62c, 0x7c2428ce ]
+    - [ be32, 0x0021d630, 0x7c2329ce ]
+    - [ be32, 0x0021d634, 0x7c2430ce ]
+    - [ be32, 0x0021d638, 0x7c2331ce ]
+    - [ be32, 0x0021d63c, 0x7c2438ce ]
+    - [ be32, 0x0021d640, 0x7c2339ce ]
+    - [ be32, 0x0021d644, 0x9b7f0058 ]
+    - [ be32, 0x0021d648, 0x9b7f0059 ]
+    - [ be32, 0x0021d64c, 0x480000a0 ]
+    - [ be32, 0x0021d650, 0xa06b0122 ]
+    - [ be32, 0x0021d654, 0x7863e7e2 ]
+    - [ be32, 0x0021d658, 0x5463063e ]
+    - [ be32, 0x0021d65c, 0x2f830000 ]
+    - [ be32, 0x0021d660, 0x419e0008 ]
+    - [ be32, 0x0021d664, 0x48000014 ]
+    - [ be32, 0x0021d668, 0x38000001 ]
+    - [ be32, 0x0021d66c, 0x981f0058 ]
+    - [ be32, 0x0021d670, 0x981f0059 ]
+    - [ be32, 0x0021d674, 0x48000058 ]
+    - [ be32, 0x0021d678, 0x9b7f0058 ]
+    - [ be32, 0x0021d67c, 0x9b7f0059 ]
+    - [ be32, 0x0021d680, 0x4800004c ]
+    - [ be32, 0x0021d684, 0x8069000c ]
+    - [ be32, 0x0021d688, 0x80890204 ]
+    - [ be32, 0x0021d68c, 0x38630010 ]
+    - [ be32, 0x0021d690, 0x38840010 ]
+    - [ be32, 0x0021d694, 0x38a00010 ]
+    - [ be32, 0x0021d698, 0x38c00020 ]
+    - [ be32, 0x0021d69c, 0x38e00030 ]
+    - [ be32, 0x0021d6a0, 0x7c2020ce ]
+    - [ be32, 0x0021d6a4, 0x7c2019ce ]
+    - [ be32, 0x0021d6a8, 0x7c2428ce ]
+    - [ be32, 0x0021d6ac, 0x7c2329ce ]
+    - [ be32, 0x0021d6b0, 0x7c2430ce ]
+    - [ be32, 0x0021d6b4, 0x7c2331ce ]
+    - [ be32, 0x0021d6b8, 0x7c2438ce ]
+    - [ be32, 0x0021d6bc, 0x7c2339ce ]
+    - [ be32, 0x0021d6c0, 0x9b7f0058 ]
+    - [ be32, 0x0021d6c4, 0x9b7f0059 ]
+    - [ be32, 0x0021d6c8, 0x48000024 ]
+    - [ be32, 0x0021d6cc, 0x38000001 ]
+    - [ be32, 0x0021d6d0, 0x901f0044 ]
+    - [ be32, 0x0021d6d4, 0x38c00000 ]
+    - [ be32, 0x0021d6d8, 0x38a00000 ]
+    - [ be32, 0x0021d6dc, 0x80810094 ]
+    - [ be32, 0x0021d6e0, 0x80690204 ]
+    - [ be32, 0x0021d6e4, 0x4bf0bced ]
+    - [ be32, 0x0021d6e8, 0x60000000 ]
+    - [ be32, 0x0021d6ec, 0x80610094 ]
+    - [ be32, 0x0021d6f0, 0xe80100b0 ]
+    - [ be32, 0x0021d6f4, 0x7c0803a6 ]
+    - [ be32, 0x0021d6f8, 0x382100a0 ]
+    - [ be32, 0x0021d6fc, 0x4e800020 ]
+
+PPU-5446a2645880eefa75f7e374abd6b7818511e2ef:
+  "Enable FreeCam + Teleport":
+    Games:
+      "Demon's Souls":
+        BLES00932: [ 01.00 ]
+    Author: "horkrux (FreeCam), Vergervan (Teleport)"
+    Notes: "FreeCam: tap Cross then L3. Teleport combo is configurable (default L3+R3). Disable stock Enable FreeCam. EU — playtested."
+    Configurable Values: *Teleport_Configurable
+    Patch Version: 1.9
+    Patch:
+      - [ load, *BLES00932_FreeCam ]
+      - [ be32, 0x0022049c, 0x48000014 ] # b teleport
+      - [ be32, 0x002204b0, 0x81210094 ] # lwz r9, 0x94(r1) pad
+      - [ be32, 0x002204b4, 0x2f890000 ] # cmpwi cr7, r9, 0
+      - [ be32, 0x002204b8, 0x419e00d4 ] # beq epilogue
+      - [ be32, 0x002204bc, 0x81690004 ] # lwz r11, 4(r9) inner
+      - [ be32, 0x002204c0, 0x2f8b0000 ] # cmpwi cr7, r11, 0
+      - [ be32, 0x002204c4, 0x419e00c8 ] # beq epilogue
+      - [ be32, 0x002204c8, 0xa06b012e ] # lhz r3, 0x12E(r11)
+      - [ be32, 0x002204cc, 0x7c6318f8 ] # not r3, r3
+      - [ be32, 0x002204d0, "Teleport combo" ] # andi. r3, r3, MASK  (config)
+      - [ be32, 0x002204d4, 0x408200a4 ] # bne cr0, clear_flag
+      - [ be32, 0x002204d8, 0x60000000 ] # nop
+      - [ be32, 0x002204dc, 0x60000000 ] # nop
+      - [ be32, 0x002204e0, 0x60000000 ] # nop
+      - [ be32, 0x002204e4, 0x60000000 ] # nop
+      - [ be32, 0x002204e8, 0x813f0034 ] # lwz r9, 0x34(r31) cam_mgr
+      - [ be32, 0x002204ec, 0x2f890000 ] # cmpwi cr7, r9, 0
+      - [ be32, 0x002204f0, 0x419e009c ] # beq epilogue
+      - [ be32, 0x002204f4, 0x886901f8 ] # lbz r3, 0x1F8(r9) edge flag
+      - [ be32, 0x002204f8, 0x2f830000 ] # cmpwi cr7, r3, 0
+      - [ be32, 0x002204fc, 0x409e0090 ] # bne already held
+      - [ be32, 0x00220500, 0x38600001 ] # li r3, 1
+      - [ be32, 0x00220504, 0x986901f8 ] # stb 1, flag
+      - [ be32, 0x00220508, 0x81090204 ] # lwz r8, 0x204(r9) dbgcam
+      - [ be32, 0x0022050c, 0x2f880000 ] # cmpwi cr7, r8, 0
+      - [ be32, 0x00220510, 0x419e007c ] # beq epilogue
+      - [ be32, 0x00220514, 0x38000040 ] # li r0, 0x40
+      - [ be32, 0x00220518, 0x7c4800ce ] # lvx v2, r8, r0  cam pos
+      - [ be32, 0x0022051c, 0x81228774 ] # lwz r9, -0x788C(r2)
+      - [ be32, 0x00220520, 0x81298004 ] # lwz r9, -0x7FFC(r9)
+      - [ be32, 0x00220524, 0x80690000 ] # lwz r3, 0(r9) ChrInsMan
+      - [ be32, 0x00220528, 0x2f830000 ] # cmpwi cr7, r3, 0
+      - [ be32, 0x0022052c, 0x419e0060 ] # beq epilogue
+      - [ be32, 0x00220530, 0x80830204 ] # lwz r4, 0x204(r3) cur chr
+      - [ be32, 0x00220534, 0x2f840000 ] # cmpwi cr7, r4, 0
+      - [ be32, 0x00220538, 0x409e0008 ] # bne got_player
+      - [ be32, 0x0022053c, 0x808301bc ] # lwz r4, 0x1BC(r3) PlayerIns
+      - [ be32, 0x00220540, 0x2f840000 ] # cmpwi cr7, r4, 0
+      - [ be32, 0x00220544, 0x419e0048 ] # beq epilogue
+      - [ be32, 0x00220548, 0x80640020 ] # lwz r3, 0x20(r4) ChrCtrl
+      - [ be32, 0x0022054c, 0x2f830000 ] # cmpwi cr7, r3, 0
+      - [ be32, 0x00220550, 0x419e003c ] # beq epilogue
+      - [ be32, 0x00220554, 0x380000d0 ] # li r0, 0xD0
+      - [ be32, 0x00220558, 0x7c6300ce ] # lvx v3, r3, r0  keep angle
+      - [ be32, 0x0022055c, 0x7c8a2378 ] # mr r10, r4
+      - [ be32, 0x00220560, 0x480c8081 ] # bl SetTransform (same rel as EU)
+      - [ be32, 0x00220564, 0x60000000 ] # nop
+      - [ be32, 0x00220568, 0x7d435378 ] # mr r3, r10
+      - [ be32, 0x0022056c, 0x4804fa85 ] # bl RefreshChr (same rel as EU)
+      - [ be32, 0x00220570, 0x60000000 ] # nop
+      - [ be32, 0x00220574, 0x48000018 ] # b epilogue
+      - [ be32, 0x00220578, 0x813f0034 ] # clear_flag
+      - [ be32, 0x0022057c, 0x2f890000 ]
+      - [ be32, 0x00220580, 0x419e000c ]
+      - [ be32, 0x00220584, 0x38600000 ]
+      - [ be32, 0x00220588, 0x986901f8 ] # stb 0, flag
+      - [ be32, 0x0022058c, 0x80610094 ] # epilogue r3=pad
+      - [ be32, 0x00220590, 0xe80100b0 ]
+      - [ be32, 0x00220594, 0x7c0803a6 ]
+      - [ be32, 0x00220598, 0x382100a0 ]
+      - [ be32, 0x0022059c, 0x4e800020 ] # blr  END OF SAFE CAVE
+
+PPU-83681f6110d33442329073b72b8dc88a2f677172:
+  "Enable FreeCam + Teleport":
+    Games:
+      "Demon's Souls":
+        BLUS30443: [ 01.00 ]
+    Author: "horkrux (FreeCam), Vergervan (Teleport)"
+    Notes: "FreeCam: tap Cross then L3. Teleport combo is configurable (default L3+R3). Disable stock Enable FreeCam. US — cave slid from EU, not playtested."
+    Configurable Values: *Teleport_Configurable
+    Patch Version: 1.9
+    Patch:
+      - [ load, *BLUS30443_FreeCam ]
+      - [ be32, 0x0021f614, 0x48000014 ] # b teleport
+      - [ be32, 0x0021f628, 0x81210094 ] # lwz r9, 0x94(r1) pad
+      - [ be32, 0x0021f62c, 0x2f890000 ] # cmpwi cr7, r9, 0
+      - [ be32, 0x0021f630, 0x419e00d4 ] # beq epilogue
+      - [ be32, 0x0021f634, 0x81690004 ] # lwz r11, 4(r9) inner
+      - [ be32, 0x0021f638, 0x2f8b0000 ] # cmpwi cr7, r11, 0
+      - [ be32, 0x0021f63c, 0x419e00c8 ] # beq epilogue
+      - [ be32, 0x0021f640, 0xa06b012e ] # lhz r3, 0x12E(r11)
+      - [ be32, 0x0021f644, 0x7c6318f8 ] # not r3, r3
+      - [ be32, 0x0021f648, "Teleport combo" ] # andi. r3, r3, MASK  (config)
+      - [ be32, 0x0021f64c, 0x408200a4 ] # bne cr0, clear_flag
+      - [ be32, 0x0021f650, 0x60000000 ] # nop
+      - [ be32, 0x0021f654, 0x60000000 ] # nop
+      - [ be32, 0x0021f658, 0x60000000 ] # nop
+      - [ be32, 0x0021f65c, 0x60000000 ] # nop
+      - [ be32, 0x0021f660, 0x813f0034 ] # lwz r9, 0x34(r31) cam_mgr
+      - [ be32, 0x0021f664, 0x2f890000 ] # cmpwi cr7, r9, 0
+      - [ be32, 0x0021f668, 0x419e009c ] # beq epilogue
+      - [ be32, 0x0021f66c, 0x886901f8 ] # lbz r3, 0x1F8(r9) edge flag
+      - [ be32, 0x0021f670, 0x2f830000 ] # cmpwi cr7, r3, 0
+      - [ be32, 0x0021f674, 0x409e0090 ] # bne already held
+      - [ be32, 0x0021f678, 0x38600001 ] # li r3, 1
+      - [ be32, 0x0021f67c, 0x986901f8 ] # stb 1, flag
+      - [ be32, 0x0021f680, 0x81090204 ] # lwz r8, 0x204(r9) dbgcam
+      - [ be32, 0x0021f684, 0x2f880000 ] # cmpwi cr7, r8, 0
+      - [ be32, 0x0021f688, 0x419e007c ] # beq epilogue
+      - [ be32, 0x0021f68c, 0x38000040 ] # li r0, 0x40
+      - [ be32, 0x0021f690, 0x7c4800ce ] # lvx v2, r8, r0  cam pos
+      - [ be32, 0x0021f694, 0x81228774 ] # lwz r9, -0x788C(r2)
+      - [ be32, 0x0021f698, 0x81298004 ] # lwz r9, -0x7FFC(r9)
+      - [ be32, 0x0021f69c, 0x80690000 ] # lwz r3, 0(r9) ChrInsMan
+      - [ be32, 0x0021f6a0, 0x2f830000 ] # cmpwi cr7, r3, 0
+      - [ be32, 0x0021f6a4, 0x419e0060 ] # beq epilogue
+      - [ be32, 0x0021f6a8, 0x80830204 ] # lwz r4, 0x204(r3) cur chr
+      - [ be32, 0x0021f6ac, 0x2f840000 ] # cmpwi cr7, r4, 0
+      - [ be32, 0x0021f6b0, 0x409e0008 ] # bne got_player
+      - [ be32, 0x0021f6b4, 0x808301bc ] # lwz r4, 0x1BC(r3) PlayerIns
+      - [ be32, 0x0021f6b8, 0x2f840000 ] # cmpwi cr7, r4, 0
+      - [ be32, 0x0021f6bc, 0x419e0048 ] # beq epilogue
+      - [ be32, 0x0021f6c0, 0x80640020 ] # lwz r3, 0x20(r4) ChrCtrl
+      - [ be32, 0x0021f6c4, 0x2f830000 ] # cmpwi cr7, r3, 0
+      - [ be32, 0x0021f6c8, 0x419e003c ] # beq epilogue
+      - [ be32, 0x0021f6cc, 0x380000d0 ] # li r0, 0xD0
+      - [ be32, 0x0021f6d0, 0x7c6300ce ] # lvx v3, r3, r0  keep angle
+      - [ be32, 0x0021f6d4, 0x7c8a2378 ] # mr r10, r4
+      - [ be32, 0x0021f6d8, 0x480c8081 ] # bl SetTransform (same rel as EU)
+      - [ be32, 0x0021f6dc, 0x60000000 ] # nop
+      - [ be32, 0x0021f6e0, 0x7d435378 ] # mr r3, r10
+      - [ be32, 0x0021f6e4, 0x4804fa85 ] # bl RefreshChr (same rel as EU)
+      - [ be32, 0x0021f6e8, 0x60000000 ] # nop
+      - [ be32, 0x0021f6ec, 0x48000018 ] # b epilogue
+      - [ be32, 0x0021f6f0, 0x813f0034 ] # clear_flag
+      - [ be32, 0x0021f6f4, 0x2f890000 ]
+      - [ be32, 0x0021f6f8, 0x419e000c ]
+      - [ be32, 0x0021f6fc, 0x38600000 ]
+      - [ be32, 0x0021f700, 0x986901f8 ] # stb 0, flag
+      - [ be32, 0x0021f704, 0x80610094 ] # epilogue r3=pad
+      - [ be32, 0x0021f708, 0xe80100b0 ]
+      - [ be32, 0x0021f70c, 0x7c0803a6 ]
+      - [ be32, 0x0021f710, 0x382100a0 ]
+      - [ be32, 0x0021f714, 0x4e800020 ] # blr  END OF SAFE CAVE
+
+PPU-9403fe1678487def5d7f3c380b4c4fb275035378:
+  "Enable FreeCam + Teleport":
+    Games:
+      "Demon's Souls":
+        BCAS20071: [ 01.04 ]
+    Author: "horkrux (FreeCam), Vergervan (Teleport)"
+    Notes: "FreeCam: tap Cross then L3. Teleport combo is configurable (default L3+R3). Disable stock Enable FreeCam. Asia — cave slid from EU, not playtested."
+    Configurable Values: *Teleport_Configurable
+    Patch Version: 1.9
+    Patch:
+      - [ load, *BCAS20071_FreeCam ]
+      - [ be32, 0x0021d6ec, 0x48000014 ] # b teleport
+      - [ be32, 0x0021d700, 0x81210094 ] # lwz r9, 0x94(r1) pad
+      - [ be32, 0x0021d704, 0x2f890000 ] # cmpwi cr7, r9, 0
+      - [ be32, 0x0021d708, 0x419e00d4 ] # beq epilogue
+      - [ be32, 0x0021d70c, 0x81690004 ] # lwz r11, 4(r9) inner
+      - [ be32, 0x0021d710, 0x2f8b0000 ] # cmpwi cr7, r11, 0
+      - [ be32, 0x0021d714, 0x419e00c8 ] # beq epilogue
+      - [ be32, 0x0021d718, 0xa06b012e ] # lhz r3, 0x12E(r11)
+      - [ be32, 0x0021d71c, 0x7c6318f8 ] # not r3, r3
+      - [ be32, 0x0021d720, "Teleport combo" ] # andi. r3, r3, MASK  (config)
+      - [ be32, 0x0021d724, 0x408200a4 ] # bne cr0, clear_flag
+      - [ be32, 0x0021d728, 0x60000000 ] # nop
+      - [ be32, 0x0021d72c, 0x60000000 ] # nop
+      - [ be32, 0x0021d730, 0x60000000 ] # nop
+      - [ be32, 0x0021d734, 0x60000000 ] # nop
+      - [ be32, 0x0021d738, 0x813f0034 ] # lwz r9, 0x34(r31) cam_mgr
+      - [ be32, 0x0021d73c, 0x2f890000 ] # cmpwi cr7, r9, 0
+      - [ be32, 0x0021d740, 0x419e009c ] # beq epilogue
+      - [ be32, 0x0021d744, 0x886901f8 ] # lbz r3, 0x1F8(r9) edge flag
+      - [ be32, 0x0021d748, 0x2f830000 ] # cmpwi cr7, r3, 0
+      - [ be32, 0x0021d74c, 0x409e0090 ] # bne already held
+      - [ be32, 0x0021d750, 0x38600001 ] # li r3, 1
+      - [ be32, 0x0021d754, 0x986901f8 ] # stb 1, flag
+      - [ be32, 0x0021d758, 0x81090204 ] # lwz r8, 0x204(r9) dbgcam
+      - [ be32, 0x0021d75c, 0x2f880000 ] # cmpwi cr7, r8, 0
+      - [ be32, 0x0021d760, 0x419e007c ] # beq epilogue
+      - [ be32, 0x0021d764, 0x38000040 ] # li r0, 0x40
+      - [ be32, 0x0021d768, 0x7c4800ce ] # lvx v2, r8, r0  cam pos
+      - [ be32, 0x0021d76c, 0x81228774 ] # lwz r9, -0x788C(r2)
+      - [ be32, 0x0021d770, 0x81298004 ] # lwz r9, -0x7FFC(r9)
+      - [ be32, 0x0021d774, 0x80690000 ] # lwz r3, 0(r9) ChrInsMan
+      - [ be32, 0x0021d778, 0x2f830000 ] # cmpwi cr7, r3, 0
+      - [ be32, 0x0021d77c, 0x419e0060 ] # beq epilogue
+      - [ be32, 0x0021d780, 0x80830204 ] # lwz r4, 0x204(r3) cur chr
+      - [ be32, 0x0021d784, 0x2f840000 ] # cmpwi cr7, r4, 0
+      - [ be32, 0x0021d788, 0x409e0008 ] # bne got_player
+      - [ be32, 0x0021d78c, 0x808301bc ] # lwz r4, 0x1BC(r3) PlayerIns
+      - [ be32, 0x0021d790, 0x2f840000 ] # cmpwi cr7, r4, 0
+      - [ be32, 0x0021d794, 0x419e0048 ] # beq epilogue
+      - [ be32, 0x0021d798, 0x80640020 ] # lwz r3, 0x20(r4) ChrCtrl
+      - [ be32, 0x0021d79c, 0x2f830000 ] # cmpwi cr7, r3, 0
+      - [ be32, 0x0021d7a0, 0x419e003c ] # beq epilogue
+      - [ be32, 0x0021d7a4, 0x380000d0 ] # li r0, 0xD0
+      - [ be32, 0x0021d7a8, 0x7c6300ce ] # lvx v3, r3, r0  keep angle
+      - [ be32, 0x0021d7ac, 0x7c8a2378 ] # mr r10, r4
+      - [ be32, 0x0021d7b0, 0x480c8081 ] # bl SetTransform (same rel as EU)
+      - [ be32, 0x0021d7b4, 0x60000000 ] # nop
+      - [ be32, 0x0021d7b8, 0x7d435378 ] # mr r3, r10
+      - [ be32, 0x0021d7bc, 0x4804fa85 ] # bl RefreshChr (same rel as EU)
+      - [ be32, 0x0021d7c0, 0x60000000 ] # nop
+      - [ be32, 0x0021d7c4, 0x48000018 ] # b epilogue
+      - [ be32, 0x0021d7c8, 0x813f0034 ] # clear_flag
+      - [ be32, 0x0021d7cc, 0x2f890000 ]
+      - [ be32, 0x0021d7d0, 0x419e000c ]
+      - [ be32, 0x0021d7d4, 0x38600000 ]
+      - [ be32, 0x0021d7d8, 0x986901f8 ] # stb 0, flag
+      - [ be32, 0x0021d7dc, 0x80610094 ] # epilogue r3=pad
+      - [ be32, 0x0021d7e0, 0xe80100b0 ]
+      - [ be32, 0x0021d7e4, 0x7c0803a6 ]
+      - [ be32, 0x0021d7e8, 0x382100a0 ]
+      - [ be32, 0x0021d7ec, 0x4e800020 ] # blr  END OF SAFE CAVE
+
+PPU-f965a746d844cd0c572a7e8731b5b3b7a81f7bdd:
+  "Enable FreeCam + Teleport":
+    Games:
+      "Demon's Souls Trade Demo":
+        BLUD80018: [ 01.01 ]
+    Author: "horkrux (FreeCam), Vergervan (Teleport)"
+    Notes: "FreeCam: tap Cross then L3. Teleport combo is configurable (default L3+R3). Disable stock Enable FreeCam. US demo — same FreeCam cave as BLUS30443, not playtested."
+    Configurable Values: *Teleport_Configurable
+    Patch Version: 1.9
+    Patch:
+      - [ load, *BLUS30443_FreeCam ]
+      - [ be32, 0x0021f614, 0x48000014 ] # b teleport
+      - [ be32, 0x0021f628, 0x81210094 ] # lwz r9, 0x94(r1) pad
+      - [ be32, 0x0021f62c, 0x2f890000 ] # cmpwi cr7, r9, 0
+      - [ be32, 0x0021f630, 0x419e00d4 ] # beq epilogue
+      - [ be32, 0x0021f634, 0x81690004 ] # lwz r11, 4(r9) inner
+      - [ be32, 0x0021f638, 0x2f8b0000 ] # cmpwi cr7, r11, 0
+      - [ be32, 0x0021f63c, 0x419e00c8 ] # beq epilogue
+      - [ be32, 0x0021f640, 0xa06b012e ] # lhz r3, 0x12E(r11)
+      - [ be32, 0x0021f644, 0x7c6318f8 ] # not r3, r3
+      - [ be32, 0x0021f648, "Teleport combo" ] # andi. r3, r3, MASK  (config)
+      - [ be32, 0x0021f64c, 0x408200a4 ] # bne cr0, clear_flag
+      - [ be32, 0x0021f650, 0x60000000 ] # nop
+      - [ be32, 0x0021f654, 0x60000000 ] # nop
+      - [ be32, 0x0021f658, 0x60000000 ] # nop
+      - [ be32, 0x0021f65c, 0x60000000 ] # nop
+      - [ be32, 0x0021f660, 0x813f0034 ] # lwz r9, 0x34(r31) cam_mgr
+      - [ be32, 0x0021f664, 0x2f890000 ] # cmpwi cr7, r9, 0
+      - [ be32, 0x0021f668, 0x419e009c ] # beq epilogue
+      - [ be32, 0x0021f66c, 0x886901f8 ] # lbz r3, 0x1F8(r9) edge flag
+      - [ be32, 0x0021f670, 0x2f830000 ] # cmpwi cr7, r3, 0
+      - [ be32, 0x0021f674, 0x409e0090 ] # bne already held
+      - [ be32, 0x0021f678, 0x38600001 ] # li r3, 1
+      - [ be32, 0x0021f67c, 0x986901f8 ] # stb 1, flag
+      - [ be32, 0x0021f680, 0x81090204 ] # lwz r8, 0x204(r9) dbgcam
+      - [ be32, 0x0021f684, 0x2f880000 ] # cmpwi cr7, r8, 0
+      - [ be32, 0x0021f688, 0x419e007c ] # beq epilogue
+      - [ be32, 0x0021f68c, 0x38000040 ] # li r0, 0x40
+      - [ be32, 0x0021f690, 0x7c4800ce ] # lvx v2, r8, r0  cam pos
+      - [ be32, 0x0021f694, 0x81228774 ] # lwz r9, -0x788C(r2)
+      - [ be32, 0x0021f698, 0x81298004 ] # lwz r9, -0x7FFC(r9)
+      - [ be32, 0x0021f69c, 0x80690000 ] # lwz r3, 0(r9) ChrInsMan
+      - [ be32, 0x0021f6a0, 0x2f830000 ] # cmpwi cr7, r3, 0
+      - [ be32, 0x0021f6a4, 0x419e0060 ] # beq epilogue
+      - [ be32, 0x0021f6a8, 0x80830204 ] # lwz r4, 0x204(r3) cur chr
+      - [ be32, 0x0021f6ac, 0x2f840000 ] # cmpwi cr7, r4, 0
+      - [ be32, 0x0021f6b0, 0x409e0008 ] # bne got_player
+      - [ be32, 0x0021f6b4, 0x808301bc ] # lwz r4, 0x1BC(r3) PlayerIns
+      - [ be32, 0x0021f6b8, 0x2f840000 ] # cmpwi cr7, r4, 0
+      - [ be32, 0x0021f6bc, 0x419e0048 ] # beq epilogue
+      - [ be32, 0x0021f6c0, 0x80640020 ] # lwz r3, 0x20(r4) ChrCtrl
+      - [ be32, 0x0021f6c4, 0x2f830000 ] # cmpwi cr7, r3, 0
+      - [ be32, 0x0021f6c8, 0x419e003c ] # beq epilogue
+      - [ be32, 0x0021f6cc, 0x380000d0 ] # li r0, 0xD0
+      - [ be32, 0x0021f6d0, 0x7c6300ce ] # lvx v3, r3, r0  keep angle
+      - [ be32, 0x0021f6d4, 0x7c8a2378 ] # mr r10, r4
+      - [ be32, 0x0021f6d8, 0x480c8081 ] # bl SetTransform (same rel as EU)
+      - [ be32, 0x0021f6dc, 0x60000000 ] # nop
+      - [ be32, 0x0021f6e0, 0x7d435378 ] # mr r3, r10
+      - [ be32, 0x0021f6e4, 0x4804fa85 ] # bl RefreshChr (same rel as EU)
+      - [ be32, 0x0021f6e8, 0x60000000 ] # nop
+      - [ be32, 0x0021f6ec, 0x48000018 ] # b epilogue
+      - [ be32, 0x0021f6f0, 0x813f0034 ] # clear_flag
+      - [ be32, 0x0021f6f4, 0x2f890000 ]
+      - [ be32, 0x0021f6f8, 0x419e000c ]
+      - [ be32, 0x0021f6fc, 0x38600000 ]
+      - [ be32, 0x0021f700, 0x986901f8 ] # stb 0, flag
+      - [ be32, 0x0021f704, 0x80610094 ] # epilogue r3=pad
+      - [ be32, 0x0021f708, 0xe80100b0 ]
+      - [ be32, 0x0021f70c, 0x7c0803a6 ]
+      - [ be32, 0x0021f710, 0x382100a0 ]
+      - [ be32, 0x0021f714, 0x4e800020 ] # blr  END OF SAFE CAVE
