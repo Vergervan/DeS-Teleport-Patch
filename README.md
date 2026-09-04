@@ -1,6 +1,6 @@
 # FreeCam + Teleport (Demon's Souls)
 
-RPCS3 PPU patch **1.0**: hold **L3 + R3** to teleport the player to the **current camera** (normal gameplay or FreeCam). Does **not** include FreeCam code. Enable stock **Enable FreeCam** first.
+RPCS3 PPU patch **1.0**: hold **L3 + R3** to teleport the player to the **current camera** (normal gameplay or FreeCam)
 
 Playtested on **BLES00932 01.00** and **BLUS30443 01.00**. Asia still uses inferred `bl` encodings (likely crash on teleport). Japanese **BCJS30022** is not included (no FreeCam cave upstream).
 
@@ -17,9 +17,9 @@ Release file: `imported_patch.yml` (**Teleport to FreeCam** overlay only).
 
 1. If `RPCS3/patches/imported_patch.yml` does **not** exist, copy this file there.
 2. If that file **already exists**, do **not** replace it. Merge: keep one `Version: 1.2` at the top, paste the `Anchors:` blocks and each `PPU-...` `"Teleport to FreeCam"` patch next to any existing patches for that hash.
-3. Manage Game Patches → enable stock **Enable FreeCam** **and** **Teleport to FreeCam**. Disable **Enable FreeCam + Teleport** if an old combined patch is still listed.
+3. Manage Game Patches → enable **Enable FreeCam + Teleport**
 
-Do **not** enable this patch without stock Enable FreeCam.
+Do **not** enable this patch with stock Enable FreeCam.
 
 ## Controls
 
@@ -34,10 +34,7 @@ Facing is kept. Physics stays valid.
 
 ## Credits
 
-- **horkrux** — stock Enable FreeCam in RPCS3 (required; not in this file)
-- **Meowmaritus** — original DS1 freecam approach
-- **Vergervan** — teleport overlay, pad map, this package
-
+- **horkrux** — stock Enable FreeCam in RPCS3
 ---
 
 ## For developers / agents
